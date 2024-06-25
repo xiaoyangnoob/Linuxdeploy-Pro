@@ -24,6 +24,7 @@
     <string name="menu_refresh">刷新</string>
     <string name="menu_more">菜单</string>
     <string name="menu_ssh">启动sshClient</string>
+    <string name="menu_vnc">启动vncClient</string>
     <string name="loading_message">加载数据中……</string>
     <string name="updating_env_message">更新操作环境中……</string>
     <string name="removing_env_message">移除操作环境中……</string>
