@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements
                         (dialog, id) -> {
 
 			/* get pulse_port */
-			StringBuilder portStr = new StringBuilder("");;
+			StringBuilder portStr = new StringBuilder("");
 			String fileName = PrefStore.getEnvDir(this)+"/config/"+
 			PrefStore.getProfileName(this)+".conf";
 			File confFile = new File(fileName);
@@ -368,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements
 			} catch (IOException e) {
 			//error
 			};
+			    String s = portStr.toString();
                             // actions
                             Handler h = new Handler();
                             if (PrefStore.isXserver(getApplicationContext())
@@ -379,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (!portStr.isEmpty()) {
+							if (!s.isEmpty()) {
 								PlayMusic();
 							}
 						}
@@ -395,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (!portStr.isEmpty()) {
+							if (!s.isEmpty()) {
 								PlayMusic();
 							}
 						}
@@ -406,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (!portStr.isEmpty()) {
+							if (!s.isEmpty()) {
 								PlayMusic();
 							}	
 						}
