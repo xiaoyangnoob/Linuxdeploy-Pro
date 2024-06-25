@@ -380,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (!s.isEmpty()) {
+							if (!s.isEmpty() || s == null) {
 								PlayMusic();
 							}
 						}
@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (!s.isEmpty()) {
+							if (!s.isEmpty() || s == null) {
 								PlayMusic();
 							}
 						}
@@ -407,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (!s.isEmpty()) {
+							if (!s.isEmpty() || s == null) {
 								PlayMusic();
 							}	
 						}
