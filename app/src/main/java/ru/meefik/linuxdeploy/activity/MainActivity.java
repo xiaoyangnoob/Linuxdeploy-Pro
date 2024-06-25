@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements
                         (dialog, id) -> {
 
 			/* get pulse_port */
-			String portStr = "";
+			StringBuilder portStr = "";
 			String fileName = PrefStore.getEnvDir(this)+"/config/"+
 			PrefStore.getProfileName(this)+".conf";
 			File confFile = new File(fileName);
