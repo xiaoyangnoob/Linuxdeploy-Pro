@@ -28,5 +28,3 @@
         android:id="@+id/menu_vnc"
         android:title="@string/menu_vnc"/>
 </menu>
-
-</menu>
