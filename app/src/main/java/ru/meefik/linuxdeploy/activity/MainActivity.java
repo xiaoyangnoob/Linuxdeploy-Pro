@@ -346,6 +346,28 @@ public class MainActivity extends AppCompatActivity implements
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         (dialog, id) -> {
+
+			/* get pulse_port */
+			String portStr;
+			String fileName = PrefStore.getEnvDir(this)+"/config/"+
+			PrefStore.getProfileName(this)+".conf";
+			File confFile = new File(fileName);
+			try (BufferedReader br = new BufferedReader(new FileReader(confFile))){
+				String line;
+					while ((line = br.readLine()) != null) {
+						if (!line.startsWith("#") && !line.isEmpty()) {
+							String[] pair = line.split("=");
+							String key = pair[0];
+							String value = pair[1];
+							if(key.equals("PULSE_PORT")) {
+								portStr = value.replaceAll("\"", "");
+								break;
+							}			
+						}		
+					}	
+			} catch (IOException e) {
+			//error
+			};
                             // actions
                             Handler h = new Handler();
                             if (PrefStore.isXserver(getApplicationContext())
@@ -354,11 +376,12 @@ public class MainActivity extends AppCompatActivity implements
                                 Intent intent = pm.getLaunchIntentForPackage("x.org.server");
                                 if (intent != null) startActivity(intent);
                                 h.postDelayed(() -> EnvUtils.execService(getBaseContext(), "start", "-m"), PrefStore.getXsdlDelay(getApplicationContext()));
-				//TODO: 添加if判断，只有启用pulse服务的时候才会运行。
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							PlayMusic();
+							if (portStr == null || portStr.isEmpty()) {
+								PlayMusic();
+							}
 						}
 				}, 3000);
                             } else if (PrefStore.isFramebuffer(getApplicationContext())) {
@@ -372,7 +395,9 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							PlayMusic();
+							if (portStr == null || portStr.isEmpty()) {
+								PlayMusic();
+							}
 						}
 				}, 3000);
                             } else {
@@ -381,7 +406,9 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							PlayMusic();
+							if (portStr == null || portStr.isEmpty()) {
+								PlayMusic();
+							}	
 						}
 				}, 3000);
                             }
