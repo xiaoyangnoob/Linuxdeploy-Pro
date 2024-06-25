@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements
                         (dialog, id) -> {
 
 			/* get pulse_port */
-			StringBuilder portStr = "";
+			StringBuilder portStr = new StringBuilder("");;
 			String fileName = PrefStore.getEnvDir(this)+"/config/"+
 			PrefStore.getProfileName(this)+".conf";
 			File confFile = new File(fileName);
@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements
 							String key = pair[0];
 							String value = pair[1];
 							if(key.equals("PULSE_PORT")) {
-								portStr = value.replaceAll("\"", "");
+								portStr.append(value.replaceAll("\"", ""));
 								break;
 							}			
 						}		
