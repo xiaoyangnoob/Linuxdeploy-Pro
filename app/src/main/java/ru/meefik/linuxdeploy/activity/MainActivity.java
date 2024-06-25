@@ -45,6 +45,7 @@ import ru.meefik.linuxdeploy.R;
 import ru.meefik.linuxdeploy.UpdateEnvTask;
 import ru.meefik.linuxdeploy.receiver.NetworkReceiver;
 import ru.meefik.linuxdeploy.receiver.PowerReceiver;
+import ru.meefik.linuxdeploy.simpleprotocolplayer.MusicService;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
@@ -330,6 +331,8 @@ public class MainActivity extends AppCompatActivity implements
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         (dialog, id) -> {
+			    // start music
+			    playMusic();
                             // actions
                             Handler h = new Handler();
                             if (PrefStore.isXserver(getApplicationContext())
@@ -365,7 +368,10 @@ public class MainActivity extends AppCompatActivity implements
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
-                        (dialog, id) -> EnvUtils.execService(getBaseContext(), "stop", "-u"))
+                        (dialog, id) -> { 
+				EnvUtils.execService(getBaseContext(), "stop", "-u");
+				stopMusic();
+			})
                 .setNegativeButton(android.R.string.no,
                         (dialog, id) -> dialog.cancel())
                 .show();
@@ -470,4 +476,113 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
     }
+
+    public void playMusic(View view)
+    {
+        Toast.makeText(this,"Start Musicservice",Toast.LENGTH_SHORT).show();
+
+        int mSampleRate;
+        boolean mStereo;
+        int mBufferMs;
+        boolean mRetry;
+        final String TAG = "SimpleProtocol";
+
+        // Get the IP address and port and put it in the intent
+        Intent i = new Intent(MusicService.ACTION_PLAY);
+        i.setPackage(getPackageName());
+        String ipAddr = "127.0.0.1";
+        String portStr = "12345";
+
+        /* get pulse_port */
+        String fileName = PrefStore.getEnvDir(this)+"/config/"+
+                PrefStore.getProfileName(this)+".conf";
+        File confFile = new File(fileName);
+        try (BufferedReader br = new BufferedReader(new FileReader(confFile))){
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("#") && !line.isEmpty()) {
+                    String[] pair = line.split("=");
+                    String key = pair[0];
+                    String value = pair[1];
+                    if(key.equals("PULSE_PORT")) {
+                        portStr = value.replaceAll("\"", "");
+                        break;
+                    }
+                }
+            }
+        }catch (IOException e) {
+            //error
+        };
+
+
+        if (portStr.equals("")) {
+            Toast.makeText(getApplicationContext(), "Invalid port",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Log.d(TAG, "ip:" + ipAddr);
+        i.putExtra(MusicService.DATA_IP_ADDRESS, ipAddr);
+
+        int audioPort;
+        try {
+            audioPort = Integer.parseInt(portStr);
+        } catch (NumberFormatException nfe) {
+            Log.e(TAG, "Invalid port:" + nfe);
+            Toast.makeText(getApplicationContext(), "Invalid port",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Log.d(TAG, "port:" + audioPort);
+        i.putExtra(MusicService.DATA_AUDIO_PORT, audioPort);
+
+        String rateSplit = "44100";
+
+        if (rateSplit.equals("")) {
+            try {
+                mSampleRate = Integer.parseInt(rateSplit);
+                Log.i(TAG, "rate:" + mSampleRate);
+                i.putExtra(MusicService.DATA_SAMPLE_RATE, mSampleRate);
+            } catch (NumberFormatException nfe) {
+                // Ignore the error
+                Log.i(TAG, "invalid sample rate:" + nfe);
+            }
+        }
+
+        String stereoKey = "Stereo";
+        mStereo = true;
+        i.putExtra(MusicService.DATA_STEREO, mStereo);
+        Log.i(TAG, "stereo:" + mStereo);
+
+
+        String bufferMsString = "50";
+        if (bufferMsString.length() != 0) {
+            try {
+                mBufferMs = Integer.parseInt(bufferMsString);
+                Log.d(TAG, "buffer ms:" + mBufferMs);
+                i.putExtra(MusicService.DATA_BUFFER_MS, mBufferMs);
+            } catch (NumberFormatException nfe) {
+                // Ignore the error
+                Log.i(TAG, "invalid buffer size:" + nfe);
+            }
+        }
+
+
+        mRetry = false;
+        Log.d(TAG, "retry:" + mRetry);
+        i.putExtra(MusicService.DATA_RETRY, mRetry);
+
+        /* start service */
+        startService(i);
+
+    }
+
+    private void stopMusic()
+    {
+        Toast.makeText(this,"Stop Play",Toast.LENGTH_SHORT).show();
+        /* stop service */
+        Intent i = new Intent(MusicService.ACTION_STOP);
+        i.setPackage(getPackageName());
+        startService(i);
+    }
+    
 }
