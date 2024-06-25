@@ -23,7 +23,7 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_ssh"
-	ndroid:title="@string/menu_ssh"
+	android:title="@string/menu_ssh"
 	app:showAsAction="never" />
     <item
         android:id="@+id/menu_vnc"
