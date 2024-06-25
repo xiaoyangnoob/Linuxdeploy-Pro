@@ -354,6 +354,12 @@ public class MainActivity extends AppCompatActivity implements
                                 Intent intent = pm.getLaunchIntentForPackage("x.org.server");
                                 if (intent != null) startActivity(intent);
                                 h.postDelayed(() -> EnvUtils.execService(getBaseContext(), "start", "-m"), PrefStore.getXsdlDelay(getApplicationContext()));
+				new Handler().postDelayed(new Runnable() {
+					    @Override
+					        public void run() {
+							PlayMusic();
+						}
+				}, 6000);
                             } else if (PrefStore.isFramebuffer(getApplicationContext())) {
                                 EnvUtils.execService(getBaseContext(), "start", "-m");
                                 h.postDelayed(() -> {
@@ -361,8 +367,22 @@ public class MainActivity extends AppCompatActivity implements
                                             FullscreenActivity.class);
                                     startActivity(intent);
                                 }, 1500);
+
+				new Handler().postDelayed(new Runnable() {
+					    @Override
+					        public void run() {
+							PlayMusic();
+						}
+				}, 6000);
                             } else {
                                 EnvUtils.execService(getBaseContext(), "start", "-m");
+				
+				new Handler().postDelayed(new Runnable() {
+					    @Override
+					        public void run() {
+							PlayMusic();
+						}
+				}, 6000);
                             }
                         })
                 .setNegativeButton(android.R.string.no,
@@ -650,7 +670,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void PlayMusic(View view)
+    public void PlayMusic()
     {
         Toast.makeText(this,"Start Musicservice",Toast.LENGTH_SHORT).show();
 
