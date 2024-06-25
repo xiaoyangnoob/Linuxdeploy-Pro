@@ -480,7 +480,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void playMusic(View view)
+    public void playMusic()
     {
         Toast.makeText(this,"Start Musicservice",Toast.LENGTH_SHORT).show();
 
