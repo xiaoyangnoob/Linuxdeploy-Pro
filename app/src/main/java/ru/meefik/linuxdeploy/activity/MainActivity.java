@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -36,11 +37,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.material.navigation.NavigationView;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
 import ru.meefik.linuxdeploy.EnvUtils;
 import ru.meefik.linuxdeploy.Logger;
 import ru.meefik.linuxdeploy.PrefStore;
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private NetworkReceiver networkReceiver;
     private PowerReceiver powerReceiver;
+
+
 
     private NetworkReceiver getNetworkReceiver() {
         if (networkReceiver == null)
@@ -206,6 +212,12 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case R.id.menu_clear:
                 clearLog();
+                break;
+            case R.id.menu_ssh:
+                startSshClient();
+                break;
+            case R.id.menu_vnc:
+                startVncClient();
                 break;
             case android.R.id.home:
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -369,10 +381,10 @@ public class MainActivity extends AppCompatActivity implements
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
-                        (dialog, id) -> { 
-				EnvUtils.execService(getBaseContext(), "stop", "-u");
-				stopMusic();
-			})
+                        (dialog, id) -> {
+                    EnvUtils.execService(getBaseContext(), "stop", "-u");
+                    Stopmusic();
+                })
                 .setNegativeButton(android.R.string.no,
                         (dialog, id) -> dialog.cancel())
                 .show();
@@ -393,6 +405,54 @@ public class MainActivity extends AppCompatActivity implements
      * Container deploy action
      */
     private void containerDeploy() {
+
+        /* Make sure wherther file or path exists */
+        String fileName = PrefStore.getEnvDir(this)+"/config/"+
+                PrefStore.getProfileName(this)+".conf";
+        File confFile = new File(fileName);
+        String target_path = "";
+        String target_type = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(confFile))){
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("#") && !line.isEmpty()) {
+                    String[] pair = line.split("=");
+                    String key = pair[0];
+                    String value = pair[1];
+                    if (key.equals("TARGET_PATH")) {
+                        target_path = value.replaceAll("\"","");
+                    }
+                    if (key.equals("TARGET_TYPE")) {
+                        target_type = value.replaceAll("\"","");
+                    }
+                }
+            }
+        }catch (IOException e) {
+            //error
+        };
+        target_path = target_path.replace("${ENV_DIR}",PrefStore.getEnvDir(this));
+        File target_file = new File(target_path);
+        if(target_type.equals("file")){
+            if(!target_path.equals("")) {
+                if(target_file.exists()){
+                    Toast.makeText(this,
+                            "File is existed,cannot deploy again",
+                            Toast.LENGTH_SHORT).show();
+                    return ;
+                }
+            }
+        }else if(target_type.equals("directory")){
+            if(!target_path.equals("")){
+                if(target_file.isDirectory()){
+                    Toast.makeText(this,
+                            "Directory is existed,cannot deploy again",
+                            Toast.LENGTH_SHORT).show();
+                    return ;
+                }
+            }
+        }
+
+        /* Deploy */
         new AlertDialog.Builder(this)
                 .setTitle(R.string.title_install_dialog)
                 .setMessage(R.string.message_install_dialog)
@@ -452,6 +512,118 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+
+    /*
+    * Start ssh client
+    */
+    private void startSshClient(){
+        String fileName = PrefStore.getEnvDir(this)+"/config/"+
+                PrefStore.getProfileName(this)+".conf";
+
+        /*
+        * get username and ssh_port
+         */
+        File confFile = new File(fileName);
+        String username = "";
+        String ssh_port = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(confFile))){
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("#") && !line.isEmpty()) {
+                    String[] pair = line.split("=");
+                    String key = pair[0];
+                    String value = pair[1];
+                    if(key.equals("SSH_PORT")){
+                        ssh_port = value.replaceAll("\"","");
+                    }
+                    if (key.equals("USER_NAME")) {
+                        username = value.replaceAll("\"","");
+                        break;
+                    }
+                }
+            }
+        }catch (IOException e) {
+            //error
+        };
+
+        if(username.equals("")){
+            Toast.makeText(MainActivity.this,"Start Ssh Error",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        Intent intent = new Intent("android.intent.action.VIEW",
+                Uri.parse("ssh://"+username+"@localhost:"+ssh_port));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if(intent != null ) {
+            try {
+                startActivity(intent);
+            }catch (ActivityNotFoundException e){
+                //error
+                Toast.makeText(this,"Not found ssh client",Toast.LENGTH_SHORT).show();
+            }
+        } else{
+            Toast.makeText(MainActivity.this,"Start Ssh Error",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*
+     * Start ssh client
+     */
+    private void startVncClient(){
+        String fileName = PrefStore.getEnvDir(this)+"/config/"+
+                PrefStore.getProfileName(this)+".conf";
+        File confFile = new File(fileName);
+        /*
+        * get username userpasswd vnc_display
+        */
+        String username = "";
+        String userpasswd = "";
+        String vnc_display = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(confFile))){
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("#") && !line.isEmpty()) {
+                    String[] pair = line.split("=");
+                    String key = pair[0];
+                    String value = pair[1];
+                    if (key.equals("USER_NAME")) {
+                        username = value.replaceAll("\"","");
+                    }
+                    if(key.equals("USER_PASSWORD")){
+                        userpasswd = value.replaceAll("\"","");
+                    }
+                    if(key.equals("VNC_DISPLAY")){
+                        vnc_display = value.replaceAll("\"","");
+                        break;
+                    }
+                }
+            }
+        }catch (IOException e) {
+            //error
+        };
+        if(username.equals("")||userpasswd.equals("")){
+            Toast.makeText(MainActivity.this,"Start Vnc Error",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        Intent intent = new Intent("android.intent.action.VIEW",
+                Uri.parse("vnc://127.0.0.1:"+vnc_display+"/?VncUsername="+
+                username+"&VncPassword="+userpasswd));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if(intent != null ) {
+           try {
+               startActivity(intent);
+           }catch (ActivityNotFoundException e){
+               //error
+               Toast.makeText(this,"Not found vnc client",Toast.LENGTH_SHORT).show();
+           }
+        } else{
+            Toast.makeText(MainActivity.this,"Start Vnc Error",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     /**
      * Request permission for write to storage
      */
@@ -478,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void playMusic(View view)
+    public void PlayMusic(View view)
     {
         Toast.makeText(this,"Start Musicservice",Toast.LENGTH_SHORT).show();
 
@@ -577,7 +749,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    private void stopMusic()
+    private void Stopmusic()
     {
         Toast.makeText(this,"Stop Play",Toast.LENGTH_SHORT).show();
         /* stop service */
@@ -585,5 +757,5 @@ public class MainActivity extends AppCompatActivity implements
         i.setPackage(getPackageName());
         startService(i);
     }
-    
+
 }
