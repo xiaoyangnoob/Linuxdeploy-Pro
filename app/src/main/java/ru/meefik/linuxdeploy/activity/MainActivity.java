@@ -379,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (portStr == null || portStr.isEmpty()) {
+							if (portStr != null && !portStr.isEmpty()) {
 								PlayMusic();
 							}
 						}
@@ -395,7 +395,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (portStr == null || portStr.isEmpty()) {
+							if (portStr != null && !portStr.isEmpty()) {
 								PlayMusic();
 							}
 						}
@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
-							if (portStr == null || portStr.isEmpty()) {
+							if (portStr != null && !portStr.isEmpty()) {
 								PlayMusic();
 							}	
 						}
