@@ -354,12 +354,13 @@ public class MainActivity extends AppCompatActivity implements
                                 Intent intent = pm.getLaunchIntentForPackage("x.org.server");
                                 if (intent != null) startActivity(intent);
                                 h.postDelayed(() -> EnvUtils.execService(getBaseContext(), "start", "-m"), PrefStore.getXsdlDelay(getApplicationContext()));
+				//TODO: 添加if判断，只有启用pulse服务的时候才会运行。
 				new Handler().postDelayed(new Runnable() {
 					    @Override
 					        public void run() {
 							PlayMusic();
 						}
-				}, 6000);
+				}, 3000);
                             } else if (PrefStore.isFramebuffer(getApplicationContext())) {
                                 EnvUtils.execService(getBaseContext(), "start", "-m");
                                 h.postDelayed(() -> {
@@ -373,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements
 					        public void run() {
 							PlayMusic();
 						}
-				}, 6000);
+				}, 3000);
                             } else {
                                 EnvUtils.execService(getBaseContext(), "start", "-m");
 				
@@ -382,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements
 					        public void run() {
 							PlayMusic();
 						}
-				}, 6000);
+				}, 3000);
                             }
                         })
                 .setNegativeButton(android.R.string.no,
