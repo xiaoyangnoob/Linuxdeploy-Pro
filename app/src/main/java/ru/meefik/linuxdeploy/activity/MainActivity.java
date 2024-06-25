@@ -334,8 +334,6 @@ public class MainActivity extends AppCompatActivity implements
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         (dialog, id) -> {
-			    // start music
-			    playMusic();
                             // actions
                             Handler h = new Handler();
                             if (PrefStore.isXserver(getApplicationContext())
@@ -480,7 +478,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void playMusic()
+    public void playMusic(View view)
     {
         Toast.makeText(this,"Start Musicservice",Toast.LENGTH_SHORT).show();
 
